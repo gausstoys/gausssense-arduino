@@ -18,7 +18,7 @@
 RFID rfid(SS_PIN, RST_PIN);
 
 // BLE setup (height & width must correspond with SEN_NUM)
-SoftwareSerial BTSerial(9, 8); // RX | TXSoftwareSerial BTSerial(9, 8); // RX | TX
+SoftwareSerial BTSerial(9, 8); // RX | TX
 const int MINI_GAUSSSENSE_HEIGHT = 1;     //Set the height of Mini GaussSense
 const int MINI_GAUSSSENSE_WIDTH  = 1;     //Set the width of Mini GaussSense
 int sendDataMode = 0;
@@ -116,9 +116,10 @@ void getGaussSenseData() {
       digitalWrite(selectionPin[pinNum[x]], pinVal[x]);
       for (y = 0; y < SEN_COL; y++) {
         int i = analogPins[y];
+//        int v = constrain(analogRead(i) - 512, -120, 120);
         int v = analogRead(i) - 384;
         if(v<=1) v = 1;
-        if(v>254) v = 254;
+        if(v>254) v = 254;        
         v -= 127;
         sensorVal[senID[x] + y * SEN_ROW] = v;
       }
