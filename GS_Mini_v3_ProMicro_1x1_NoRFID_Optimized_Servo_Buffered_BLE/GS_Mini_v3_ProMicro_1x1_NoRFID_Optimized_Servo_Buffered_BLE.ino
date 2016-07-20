@@ -44,7 +44,7 @@ int x = 0 , y = 0 , z = 0;
 int initiated = false;
 boolean sendAllowed = false;
 
-long lastTime = micros();
+long lastTime = millis();
 
 boolean vibratorOn = false;
 
@@ -84,7 +84,7 @@ void loop()
   {
     sendMetaData();
   }
-  Serial.println("haha");
+  logRefreshRate();
   delay(20);
 }
 
@@ -93,16 +93,16 @@ void checkBTSerialPort() { // Function for checking the serial commands
   {
     String str = BTSerial.readStringUntil('\n');
 //    Serial.println(str);
-    if (str == "start")
+    if (str == "start" || str.indexOf("start") >= 0)
     {
 //      Serial.println("Start");
       sendDataMode = 1;
     }
-    else if (str == "stop")
+    else if (str.indexOf("stop") >= 0)
     {
       sendDataMode = 0;
     }
-    else if ("handshaking")
+    else if (str == "handshaking" || str.indexOf("handshaking") >= 0)
     {
 //      Serial.println("Handshake");
       sendDataMode = 2;
@@ -128,6 +128,7 @@ void getGaussSenseData() {
 }
 
 void sendMetaData() {
+  Serial.println("sent meta data");
   BTSerial.write(0x01);
   BTSerial.write(0x01);
   BTSerial.write(0x02);
@@ -157,6 +158,12 @@ void sendGaussSenseData() {
 //      delay(10);
   }
   
+}
+
+void logRefreshRate() {
+  long currentTime = millis();
+  Serial.println("Rate: " + String(1000/(currentTime - lastTime)));
+  lastTime = currentTime;
 }
 
 

@@ -14,7 +14,8 @@
 #define SEN_COL 1
 #define SEN_NUM SEN_ROW*SEN_COL
 // Read only 2 RFID instead of 5
-#define RFID_BITNUM 2 
+#define RFID_BITNUM 2
+#define BLE_NUM 20
 
 RFID rfid(SS_PIN, RST_PIN);
 
@@ -37,7 +38,8 @@ const int senID[] = {1, 3, 2, 6, 7, 5, 4, 12, 13, 15, 14, 10, 11, 9, 8, 0};
 const int pinNum[] = {0, 1, 0, 2, 0, 1, 0, 3, 0, 1, 0, 2, 0, 1, 0, 3};
 const int pinVal[] = {1, 1, 0, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0};
 
-byte buffer[SEN_NUM + RFID_BITNUM];
+//byte buffer[SEN_NUM + RFID_BITNUM];
+byte buffer[BLE_NUM];
 
 int e0 = 0, e1 = 0, e2 = 0, e3 = 0;
 int x = 0 , y = 0 , z = 0;
@@ -45,7 +47,7 @@ int x = 0 , y = 0 , z = 0;
 int initiated = false;
 boolean sendAllowed = false;
 
-long lastTime = micros();
+long lastTime = millis();
 
 boolean vibratorOn = false;
 
@@ -86,7 +88,10 @@ void loop()
   {
     sendMetaData();
   }
-  delay(20);
+//  logRefreshRate();
+
+//  Removed delay initially for BLE since RFID would already be delaying when reading tag IDs.
+//  delay(20);
 }
 
 void checkBTSerialPort() { // Function for checking the serial commands
@@ -94,16 +99,16 @@ void checkBTSerialPort() { // Function for checking the serial commands
   {
     String str = BTSerial.readStringUntil('\n');
 //    Serial.println(str);
-    if (str == "start")
+    if (str == "start" || str.indexOf("start") >= 0)
     {
 //      Serial.println("Start");
       sendDataMode = 1;
     }
-    else if (str == "stop")
+    else if (str.indexOf("stop") >= 0)
     {
       sendDataMode = 0;
     }
-    else if ("handshaking")
+    else if (str == "handshaking" || str.indexOf("handshaking") >= 0)
     {
 //      Serial.println("Handshake");
       sendDataMode = 2;
@@ -121,12 +126,11 @@ void getRFIDData() {
     if(IDSmoothCnt>0) for (int i = 0 ; i < RFID_BITNUM ; i++)  rfidSN[i] = -128;
     IDSmoothCnt++;
   }
-
-  Serial.print("Tag ID: ");
-  for (int i = 0 ; i < RFID_BITNUM ; i++) Serial.print(rfidSN[i]);
-  Serial.println();
-  
   rfid.halt();
+
+//  Serial.print("Tag ID: ");
+//  for (int i = 0 ; i < RFID_BITNUM ; i++) Serial.print(rfidSN[i]);
+//  Serial.println();
 }
 
 void getGaussSenseData() {
@@ -164,15 +168,27 @@ void sendGaussSenseRFIDData() {
   for (int mini = 0; mini < MINI_GAUSSSENSE_HEIGHT * MINI_GAUSSSENSE_WIDTH; mini++) {
 //    BTSerial.write(zero);
 //    BTSerial.write(zero);
-    BTSerial.write(mini);
-    BTSerial.write(MINI_GAUSSSENSE_HEIGHT * MINI_GAUSSSENSE_WIDTH);
+    int n = 0;
+    buffer[n++] = mini;
+    buffer[n++] = MINI_GAUSSSENSE_HEIGHT * MINI_GAUSSSENSE_WIDTH;
+//    BTSerial.write(mini);
+//    BTSerial.write(MINI_GAUSSSENSE_HEIGHT * MINI_GAUSSSENSE_WIDTH);
     for (int i = 0; i < RFID_BITNUM; i++) {
-      BTSerial.write(rfidSN[i]);
+//      BTSerial.write(rfidSN[i]);
+      buffer[n++] = rfidSN[i];
     }
     
     for (int i = 0; i < 16; i++) {
-      BTSerial.write(sensorVal[i + mini*16]);
+//      BTSerial.write(sensorVal[i + mini*16]);
+      buffer[n++] = sensorVal[i + mini*16];
     }
+    BTSerial.write(buffer, BLE_NUM);
   }  
+}
+
+void logRefreshRate() {
+  long currentTime = millis();
+  Serial.println("Rate: " + String(1000/(currentTime - lastTime)));
+  lastTime = currentTime;
 }
 
