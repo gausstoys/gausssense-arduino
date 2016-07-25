@@ -45,15 +45,15 @@ void checkBTSerialPort() {
   while (BTSerial.available())
   {
     String str = BTSerial.readStringUntil('\n');
-    if (str == "start")
+    if (str == "start" || str.indexOf("start") >= 0)
     {
       sendDataMode = 1;
     }
-    else if (str == "stop")
+    else if (str == "stop" || str.indexOf("stop") >= 0)
     {
       sendDataMode = 0;
     }
-    else if ("handshaking")
+    else if ("handshaking" || str.indexOf("handshaking") >= 0)
     {
       sendDataMode = 2;
     }
@@ -98,10 +98,7 @@ void sendGaussSenseData(){ //Function for writing data to the serial port
     
     for (int i = 0; i < 16; i++) {
       BTSerial.write(sensorVal[i + mini*16]);
-//      Serial.print(sensorVal[i + mini*16]);
-//      Serial.print(" ");
     }
-//    Serial.println();
   }
 }
 

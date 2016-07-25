@@ -1,10 +1,6 @@
 // Using Serial1 on Arduino Leonardo
 #define BLEMini Serial1
 
-unsigned long currentMillis;        // store the current value from millis()
-unsigned long previousMillis;       // for comparison with currentMillis
-int samplingInterval = 250;         // how often to run the main loop (in milli second)
-
 // GaussSense setup
 
 /*  If using 4 Mini GaussSense modules (e.g. forming a 2x2 grid), the values should be changed as follows:
@@ -52,19 +48,16 @@ void checkBTSerialPort() {
   while (BLEMini.available())
   {
     String str = BLEMini.readStringUntil('\n');
-    if (str == "start")
+    if (str == "start" || str.indexOf("start") >= 0)
     {
-      Serial.println("start");
       sendDataMode = 1;
     }
-    else if (str == "stop")
+    else if (str == "stop" || str.indexOf("stop") >= 0)
     {
-      Serial.println("stop");
       sendDataMode = 0;
     }
-    else if ("handshaking")
+    else if ("handshaking" || str.indexOf("handshaking") >= 0)
     {
-      Serial.println("handshaking");
       sendDataMode = 2;
     }
   }
@@ -80,12 +73,9 @@ void getGaussSenseData() { //Function for getting data from all GaussSense modul
     for (int y = 0; y < MINI_GAUSSSENSE_HEIGHT * MINI_GAUSSSENSE_WIDTH; y++) {
         // Centered at 512, ranged from [512-110, 512+110]
         int v = analogRead(analogInPin[y]) - 512;
-        Serial.print(v);
-        Serial.print(" ");
         sensorVal[x + y * 16] = constrain(v, -100, 100);
     }
   }
-  Serial.println();
 }
 
 void sendMetaData() {
@@ -103,11 +93,6 @@ void sendMetaData() {
 }
 
 void sendGaussSenseData() {
-//  currentMillis = millis();
-//  if (currentMillis - previousMillis > samplingInterval)
-//  {
-//    previousMillis += millis();
-
     for (int mini = 0; mini < MINI_GAUSSSENSE_HEIGHT * MINI_GAUSSSENSE_WIDTH; mini++) {
       BLEMini.write(0x00);
       BLEMini.write(0x00);

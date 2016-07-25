@@ -98,13 +98,12 @@ void checkBTSerialPort() { // Function for checking the serial commands
   while (BTSerial.available())
   {
     String str = BTSerial.readStringUntil('\n');
-//    Serial.println(str);
     if (str == "start" || str.indexOf("start") >= 0)
     {
 //      Serial.println("Start");
       sendDataMode = 1;
     }
-    else if (str.indexOf("stop") >= 0)
+    else if (str == "stop" || str.indexOf("stop") >= 0)
     {
       sendDataMode = 0;
     }
