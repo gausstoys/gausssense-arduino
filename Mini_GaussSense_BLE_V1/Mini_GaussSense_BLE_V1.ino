@@ -44,7 +44,7 @@ void loop() {
 void checkBTSerialPort() {
   while (BTSerial.available())
   {
-    String str = BTSerial.readStringUntil('\n');
+    String str = BTSerial.readString();
     if (str == "start" || str.indexOf("start") >= 0)
     {
       sendDataMode = 1;

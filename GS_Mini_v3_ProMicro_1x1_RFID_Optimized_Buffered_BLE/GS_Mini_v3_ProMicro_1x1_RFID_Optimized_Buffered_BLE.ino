@@ -97,7 +97,8 @@ void loop()
 void checkBTSerialPort() { // Function for checking the serial commands
   while (BTSerial.available())
   {
-    String str = BTSerial.readStringUntil('\n');
+//    String str = BTSerial.readStringUntil('\n');
+    String str = BTSerial.readString();
     if (str == "start" || str.indexOf("start") >= 0)
     {
 //      Serial.println("Start");
